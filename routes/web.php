@@ -19,8 +19,9 @@ Route::get('/', function () {
 Route::get('/admin/restaurants/', 'RestaurantsController@index')->middleware('auth.basic')->name('dash');
 Route::get('/admin/restaurants/create', 'RestaurantsController@create')->middleware('auth.basic')->name('create');
 Route::post('/admin/restaurants/', 'RestaurantsController@store')->name('store');
+Route::get('/admin/restaurants/edit/{id}', 'RestaurantsController@edit')->name('edit');
 Route::delete('/admin/restaurants/{id}', 'RestaurantsController@destroy')->middleware('auth.basic')->name('delete');
-
+Route::patch('/admin/restaurants/{id}', 'RestaurantsController@update')->name('update');
 Route::get('/admin/logout', function() {
     Auth::logout();
     return redirect('/');

@@ -7,35 +7,42 @@
     <div id="map">
     </div>
 
-    <div class="dash">
+    <div class="dash edit">
         <div class="dash-item">
 
-            <h2 class="title pad">Create New Restaurant</h2>
-
-            <form method="POST" action="{{ action('RestaurantsController@store') }}">
+            <h2 class="title pad">Edit Restaurant</h2>
+            
+                <div class="errors">
+                    
+                </div>
+           
+            <form>
                 @csrf
+                @method('PATCH')
+                {{-- hidden value to grab id --}}
+                <input type="hidden" name="id" value="{{ $rest->id }}" id="id">
                 <div class="input">
-                    <label for="name">Name: *</label>
-                    <input type="text" name="name" required placeholder="Name">
+                    <label for="name">Current Name: <em>{{ $rest->name }}</em></label>
+                    <input type="text" name="name" required placeholder="Enter New Name" id="name" value="{{ $rest->name }}">
                 </div>
 
 
                 <div class="input">
-                    <label for="street">Street: *</label>
-                    <input type="text" name="street" required placeholder="Street">
+                    <label for="street">Current Street: <em>{{ $rest->street }}</em></label>
+                    <input type="text" name="street" required placeholder="Enter New Street" id="street" value="{{ $rest->street }}">
                 </div>
 
                 <div class="input">
-                    <label for="city">Town/City: *</label>
-                    <input type="text" name="city" required placeholder="City">
+                    <label for="city">Current Town/City: <em>{{ $rest->city }}</em></label>
+                    <input type="text" name="city" required placeholder="Enter New City" id="city" value="{{ $rest->city }}">
                 </div>
 
                 <div class="input">
-                    <label for="postcode">Postcode: *</label>
-                    <input type="text" name="postcode" required placeholder="Postcode">
+                    <label for="postcode">Current Postcode: <em>{{ $rest->postcode }}</em></label>
+                    <input type="text" name="postcode" required placeholder="Enter New Postcode" id="postcode" value="{{ $rest->postcode }}">
                 </div>
 
-                <button id="create" type="submit">Create</button>
+                <button id="update" type="button">Update</button>
 
             </form>
 

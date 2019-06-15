@@ -4,6 +4,23 @@ main {
         width: 100%;
         position: relative;
 
+        form {
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+
+            input {
+                margin: 10px;
+            }
+
+            label {
+                text-align: left;
+                width: 85px;
+                margin: 0;
+            }
+        }
+
+
         #map {
             position: relative;
         }
@@ -32,6 +49,37 @@ main {
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
+
+            button {
+                margin: 0 auto;
+                margin: 25px 0;
+                width: 200px;
+                padding: 7px;
+                outline: none;
+                border: 0.5px solid white;
+                color: white;
+                background: none;
+            }
+
+        }
+
+        .edit {
+
+            .input {
+                flex-direction: column;
+                justify-items: center;
+            }
+
+            form {
+                flex-direction: column;
+                flex-wrap: nowrap;
+                justify-content: center;
+                align-items: center;
+
+                label {
+                    width: 90%;
+                }
+            }
         }
 
         .dash-item {
@@ -45,33 +93,6 @@ main {
             justify-content: center;
             align-items: center;
             color: white;
-
-            button {
-                margin: 25px 0;
-                width: 200px;
-                padding: 7px;
-                outline: none;
-                border: 0.5px solid white;
-                color: white;
-                background: none;
-            }
-
-            form {
-                margin: 0 auto;
-                flex-wrap: wrap;
-                justify-content: center;
-
-                input {
-                    margin: 10px;
-                }
-
-                label {
-                    text-align: left;
-                    width: 85px;
-                    margin: 0;
-                }
-                
-            }
 
             .create {
                 padding: 5px 0 15px 0;
@@ -98,12 +119,62 @@ main {
 
         table {
             margin: 0 auto;
-            width: 100%;
+            width: 90%;
             max-width: 700px;
+            font-size: 14px;
+
+            th {
+                font-size: 16px;
+                font-weight: normal;
+            }
+
+            .name, .city, .street, .postcode {
+                width: 20%;
+            }
 
             .table-link {
                 text-align: center;
                 cursor: pointer;
+            }
+
+            a {
+                text-decoration: none;
+                color: white;
+
+                &:hover {
+                    text-decoration: none;
+                    
+                }
+            }
+        }
+
+        hr {
+            background: white;
+        }
+        .mobile {
+            margin: 0 auto;
+            width: 100%;
+            display: none;
+            text-align: center;
+
+        }
+
+        @media (max-width: 600px) {
+            table {
+                td {
+                    width: 100%;
+                    padding: 5px
+                }
+            }
+
+            .desktop {
+                display: none;
+            }
+
+            .mobile {
+                display: block;
+                width: 100%;
+                text-align: center;
             }
         }
     }

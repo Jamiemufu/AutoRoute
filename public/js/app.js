@@ -36901,13 +36901,19 @@ module.exports = function(module) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js"); //initialise map and geolocate to current location
+__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js"); //initialise map
 
 
 window.initMap = function () {
+  var lat;
+
+  var _long;
+
+  var geocoder = new google.maps.Geocoder();
   var map = new google.maps.Map(document.getElementById('map'), {
+    //default map center to Birmingham
     center: new google.maps.LatLng(52.4882913, -1.9048588),
-    zoom: 12,
+    zoom: 15,
     mapTypeControl: false,
     zoomControl: false
   }); // Try HTML5 geolocation.
@@ -36922,36 +36928,44 @@ window.initMap = function () {
     });
   } else {
     // Browser doesn't support Geolocation
-    //show search
-    // $('#search').show();
     this.console.log('Browser does not support geolocation');
   }
-}; // delete record
+  /* TODO: AJAX GET NEAREST RESTAURANT FROM DATABASE AND ROUTE */
+  // change location to address on search
 
 
-$(".delete").click(function () {
-  var message = 'Are you sure you want to delete this restaurant';
+  $("#searchBtn").click(function (e) {
+    event.preventDefault();
+    var address = $("#address").val();
+    geocoder.geocode({
+      'address': address
+    }, function (results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        //save long lat
+        lat = results[0].geometry.location.lat();
+        _long = results[0].geometry.location.lng(); //set marker
 
-  if (confirm(message)) {
-    var id = $(this).data("id");
-    var token = $("meta[name='csrf-token']").attr("content");
-    $.ajax({
-      url: "/admin/restaurants/" + id,
-      type: 'DELETE',
-      data: {
-        "id": id,
-        "_token": token
-      },
-      success: function success() {
-        $('#' + id).fadeOut();
-        $("#status").show().text('Successfully removed restaurant');
-        setInterval(function () {
-          $("#status").fadeOut();
-        }, 5000);
+        var marker = new google.maps.Marker({
+          map: map,
+          position: results[0].geometry.location
+        }); //center map
+
+        map.setCenter(results[0].geometry.location);
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
       }
     });
-  }
-}); //create via ajax to reduce API requests on failed validated
+  }); //if enter pressed on input trigger click
+
+  $('#address').keypress(function (e) {
+    //Enter key pressed
+    if (e.which == 13) {
+      $('#searchBtn').click();
+    }
+  });
+}; // Use AJAX for delete,update and create to save on API requests if vaildation fails
+//create via ajax to reduce API requests on failed validated
+
 
 $("#create").click(function () {
   var token = $("meta[name='csrf-token']").attr("content"); //clear errors on click
@@ -36968,22 +36982,84 @@ $("#create").click(function () {
       city: $("#city").val(),
       postcode: $("#postcode").val()
     },
-    success: function success(json) {
-      $(".errors").text("Successfully created restaurant");
-      setInterval(function () {
-        window.location = '/admin/restaurants';
-      }, 5000);
+    success: function success() {
+      successMessage('Successfully created restaurant');
     },
     error: function error(json) {
-      var errors = json.responseJSON.errors;
-      Object.keys(errors).forEach(function (key) {
-        $(".errors").append(errors[key] + "<br>");
-      });
+      setErrors(json);
     }
   });
-}); //TODO EDIT
-//SEARCH IN NAV
-//MAP MARKERS FROM DATABASE
+}); //create via ajax to reduce API requests on failed validated
+
+$("#update").click(function () {
+  var token = $("meta[name='csrf-token']").attr("content");
+  var id = $("#id").val(); //clear errors on click
+
+  $(".errors").text("");
+  $.ajax({
+    url: "/admin/restaurants/" + id,
+    method: 'PATCH',
+    type: 'patch',
+    data: {
+      "_token": token,
+      name: $("#name").val(),
+      street: $("#street").val(),
+      city: $("#city").val(),
+      postcode: $("#postcode").val()
+    },
+    success: function success() {
+      successMessage('Successfully updated restaurant');
+    },
+    error: function error(json) {
+      setErrors(json);
+    }
+  });
+}); // delete record
+
+$(".delete").click(function () {
+  var message = 'Are you sure you want to delete this restaurant';
+
+  if (confirm(message)) {
+    var id = $(this).data("id");
+    var token = $("meta[name='csrf-token']").attr("content");
+    $.ajax({
+      url: "/admin/restaurants/" + id,
+      type: 'DELETE',
+      data: {
+        "id": id,
+        "_token": token
+      },
+      success: function success() {
+        deleteMessage(id);
+      },
+      error: function error(json) {
+        setErrors(json);
+      }
+    });
+  }
+});
+
+function successMessage(message) {
+  $(".errors").text(message);
+  setInterval(function () {
+    window.location = '/admin/restaurants';
+  }, 5000);
+}
+
+function deleteMessage(id) {
+  $('#' + id).fadeOut();
+  $("#status").show().text('Successfully removed restaurant');
+  setInterval(function () {
+    $("#status").fadeOut();
+  }, 5000);
+}
+
+function setErrors(json) {
+  var errors = json.responseJSON.errors;
+  Object.keys(errors).forEach(function (key) {
+    $(".errors").append(errors[key] + "<br>");
+  });
+}
 
 /***/ }),
 

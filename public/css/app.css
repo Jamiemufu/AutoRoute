@@ -106,6 +106,15 @@ form button {
   background: none;
   color: white;
   border: none;
+  outline: none;
+}
+
+form input[type=button] {
+  outline: none;
+}
+
+form input[type=button]::-moz-focus-inner {
+  border: 0;
 }
 
 form input {
@@ -119,6 +128,22 @@ main .dash-container {
   height: 100%;
   width: 100%;
   position: relative;
+}
+
+main .dash-container form {
+  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+main .dash-container form input {
+  margin: 10px;
+}
+
+main .dash-container form label {
+  text-align: left;
+  width: 85px;
+  margin: 0;
 }
 
 main .dash-container #map {
@@ -153,6 +178,33 @@ main .dash-container .dash {
   flex-wrap: wrap;
 }
 
+main .dash-container .dash button {
+  margin: 0 auto;
+  margin: 25px 0;
+  width: 200px;
+  padding: 7px;
+  outline: none;
+  border: 0.5px solid white;
+  color: white;
+  background: none;
+}
+
+main .dash-container .edit .input {
+  flex-direction: column;
+  justify-items: center;
+}
+
+main .dash-container .edit form {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+main .dash-container .edit form label {
+  width: 90%;
+}
+
 main .dash-container .dash-item {
   border-radius: 15px;
   width: 100%;
@@ -164,32 +216,6 @@ main .dash-container .dash-item {
   justify-content: center;
   align-items: center;
   color: white;
-}
-
-main .dash-container .dash-item button {
-  margin: 25px 0;
-  width: 200px;
-  padding: 7px;
-  outline: none;
-  border: 0.5px solid white;
-  color: white;
-  background: none;
-}
-
-main .dash-container .dash-item form {
-  margin: 0 auto;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-main .dash-container .dash-item form input {
-  margin: 10px;
-}
-
-main .dash-container .dash-item form label {
-  text-align: left;
-  width: 85px;
-  margin: 0;
 }
 
 main .dash-container .dash-item .create {
@@ -215,13 +241,63 @@ main .dash-container .dash-item .pad {
 
 main .dash-container table {
   margin: 0 auto;
-  width: 100%;
+  width: 90%;
   max-width: 700px;
+  font-size: 14px;
+}
+
+main .dash-container table th {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+main .dash-container table .name,
+main .dash-container table .city,
+main .dash-container table .street,
+main .dash-container table .postcode {
+  width: 20%;
 }
 
 main .dash-container table .table-link {
   text-align: center;
   cursor: pointer;
+}
+
+main .dash-container table a {
+  text-decoration: none;
+  color: white;
+}
+
+main .dash-container table a:hover {
+  text-decoration: none;
+}
+
+main .dash-container hr {
+  background: white;
+}
+
+main .dash-container .mobile {
+  margin: 0 auto;
+  width: 100%;
+  display: none;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  main .dash-container table td {
+    width: 100%;
+    padding: 5px;
+  }
+
+  main .dash-container .desktop {
+    display: none;
+  }
+
+  main .dash-container .mobile {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
 }
 
 #map {

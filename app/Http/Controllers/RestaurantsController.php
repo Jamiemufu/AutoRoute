@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\ValidateForm;
+use Symfony\Component\HttpFoundation\Response;
 
 class RestaurantsController extends Controller
 {
@@ -37,7 +38,7 @@ class RestaurantsController extends Controller
      */
     public function store(ValidateForm $request)
     {
-        //formRequest Validation
+        //ValidateForm formRequest
         $validated = $request->validated();
 
         $rest = new \App\Restaurant;
@@ -48,16 +49,6 @@ class RestaurantsController extends Controller
         return response()->json();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -67,7 +58,9 @@ class RestaurantsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $rest = \App\Restaurant::find($id);
+
+        return view('admin.edit')->with('rest', $rest);
     }
 
     /**
@@ -77,9 +70,16 @@ class RestaurantsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ValidateForm $request, $id)
     {
-        //
+        //ValidateForm formRequest
+        $validated = $request->validated();
+
+        $rest = \App\Restaurant::find($id);
+
+        $rest->update($validated);
+
+        return Response()->json();
     }
 
     /**
@@ -95,8 +95,6 @@ class RestaurantsController extends Controller
 
 		$rest->delete();
 
-        return response()->json([
-            'success' => 'Record deleted successfully!'
-        ]);
+        return response()->json();
     }
 }

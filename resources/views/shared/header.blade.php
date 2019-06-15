@@ -10,8 +10,10 @@
             <li id="search">
 
                 <form action="">
-                    <input name="address" type="text" placeholder="Enter your Postcode/Address">
-                    <button id="searchBtn"><i class="fas fa-search"></i>Search</button>
+                    <input name="address" type="text" placeholder="Enter your Postcode/Address" id="address">
+                    <button id="searchBtn" type="button">
+                        <i class="fas fa-search"></i>Search
+                    </button>
                 </form>
 
             </li>
