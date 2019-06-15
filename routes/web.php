@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\RestaurantsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,4 +14,14 @@
 
 Route::get('/', function () {
     return view('pages.home');
+});
+
+Route::get('/admin/restaurants/', 'RestaurantsController@index')->middleware('auth.basic')->name('dash');
+Route::get('/admin/restaurants/create', 'RestaurantsController@create')->middleware('auth.basic')->name('create');
+Route::post('/admin/restaurants/', 'RestaurantsController@store')->name('store');
+Route::delete('/admin/restaurants/{id}', 'RestaurantsController@destroy')->middleware('auth.basic')->name('delete');
+
+Route::get('/admin/logout', function() {
+    Auth::logout();
+    return redirect('/');
 });

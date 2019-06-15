@@ -36908,7 +36908,8 @@ window.initMap = function () {
   var map = new google.maps.Map(document.getElementById('map'), {
     center: new google.maps.LatLng(52.4882913, -1.9048588),
     zoom: 12,
-    mapTypeControl: false
+    mapTypeControl: false,
+    zoomControl: false
   }); // Try HTML5 geolocation.
 
   if (navigator.geolocation) {
@@ -36922,10 +36923,67 @@ window.initMap = function () {
   } else {
     // Browser doesn't support Geolocation
     //show search
-    $('#search').show();
+    // $('#search').show();
     this.console.log('Browser does not support geolocation');
   }
-};
+}; // delete record
+
+
+$(".delete").click(function () {
+  var message = 'Are you sure you want to delete this restaurant';
+
+  if (confirm(message)) {
+    var id = $(this).data("id");
+    var token = $("meta[name='csrf-token']").attr("content");
+    $.ajax({
+      url: "/admin/restaurants/" + id,
+      type: 'DELETE',
+      data: {
+        "id": id,
+        "_token": token
+      },
+      success: function success() {
+        $('#' + id).fadeOut();
+        $("#status").show().text('Successfully removed restaurant');
+        setInterval(function () {
+          $("#status").fadeOut();
+        }, 5000);
+      }
+    });
+  }
+}); //create via ajax to reduce API requests on failed validated
+
+$("#create").click(function () {
+  var token = $("meta[name='csrf-token']").attr("content"); //clear errors on click
+
+  $(".errors").text("");
+  $.ajax({
+    url: "/admin/restaurants/",
+    method: 'post',
+    type: 'post',
+    data: {
+      "_token": token,
+      name: $("#name").val(),
+      street: $("#street").val(),
+      city: $("#city").val(),
+      postcode: $("#postcode").val()
+    },
+    success: function success(json) {
+      $(".errors").text("Successfully created restaurant");
+      setInterval(function () {
+        window.location = '/admin/restaurants';
+      }, 5000);
+    },
+    error: function error(json) {
+      var errors = json.responseJSON.errors;
+      Object.keys(errors).forEach(function (key) {
+        $(".errors").append(errors[key] + "<br>");
+      });
+    }
+  });
+}); //TODO EDIT
+//SEARCH IN NAV
+//MAP MARKERS FROM DATABASE
 
 /***/ }),
 

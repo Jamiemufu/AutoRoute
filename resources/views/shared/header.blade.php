@@ -6,14 +6,32 @@
         </div>
 
         <ul>
+
             <li id="search">
+
                 <form action="">
                     <input name="address" type="text" placeholder="Enter your Postcode/Address">
-                    <button><i class="fas fa-search"></i>Search</button>
+                    <button id="searchBtn"><i class="fas fa-search"></i>Search</button>
                 </form>
+
             </li>
-            <li>Home</li>
-            <li>Restaurants</li>
+
+            <a href="/">
+                <li>Home</li>
+            </a>
+
+            <a href="/admin/restaurants">
+                <li>Restaurants</li>
+            </a>
+            {{-- ony show logout if user authenticated --}}
+            @if (Auth::check())
+
+                <a href="/admin/logout">
+                    <li>Logout</li>
+                </a>
+
+            @endif
+
         </ul>
 
     </nav>
