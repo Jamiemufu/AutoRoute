@@ -4,5 +4,15 @@
 // Variables
 @import 'variables';
 
+//modules
+@import 'modules/footer';
+@import 'modules/header';
+@import 'modules/main';
+
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+html, body {
+    width: 100%;
+    background: rgb(58, 58, 58);
+}
