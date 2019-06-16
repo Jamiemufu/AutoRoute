@@ -21,7 +21,7 @@
 
     {{-- js scripts --}}
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API') }}&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API') }}&libraries=geometry&callback=initMap" async defer></script>
    
 </body>
 </html>

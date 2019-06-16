@@ -1,33 +1,38 @@
 require('./bootstrap')
 
-
-let geocoder;
-let map;
-let restaurant;
-let markers = [];
+var geocoder
+var map
+var homeLocation
 
 //load when ready
 window.initMap = function () {
 
     geocoder = new google.maps.Geocoder()
+    directionsService = new google.maps.DirectionsService
+    directionsDisplay = new google.maps.DirectionsRenderer
 
     //default map options
     let mapOptions = {
         center: new google.maps.LatLng(52.4882913, -1.9048588),
         zoom: 13,
         mapTypeControl: false,
+        mapTypeId: 'roadmap',
     }
 
     map = new google.maps.Map(document.getElementById('map'), mapOptions)
+    directionsDisplay.setMap(map)
 
+    // route();
     // Try HTML5 geolocation to get current location
     if (navigator.geolocation) {
+
         navigator.geolocation.getCurrentPosition(function (position) {
-            let pos = {
+            homeLocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             }
-            map.setCenter(pos)
+            map.setCenter(homeLocation)
+            console.log("INTIATED HOME: " + homeLocation.lat + ',' + homeLocation.lng)
         })
     } else {
         // Browser doesn't support Geolocation
@@ -35,29 +40,119 @@ window.initMap = function () {
     }
 
     //Fetch restaurants and put marker on map (ajax)
-    fetchData();
+    //Fetch and return nearest
+}
 
-    // change location to address on search
-    $("#searchBtn").click(function (e) {
+$(document).ready(function () {
+    $.ajax({
+        type: 'get',
+        method: 'get',
+        url: '/get',
+        success: function (json) {
+            data = json.data
 
-        let address = $("#address").val()
-        //get longlat and place marker
-        geoLocate(address);
+            //check if data is no emtpy
+            if (data.length !== 0) {
+                var nearestData = []
+                //set max number for comparison
+                var shortest = Number.MAX_VALUE
 
-        //center map
-        map.setCenter(results[0].geometry.location)
+                //geocode and get long lats and distance
+                data.forEach(element => {
+                    shortest = getClosest(element, shortest, nearestData);
+                })
 
-        e.preventDefault()
-    })
-    //if enter pressed on input trigger click
-    $('#address').keypress(function (e) {
-        //Enter key pressed
-        if (e.which == 13) {
-            $('#searchBtn').click()
+                //set time out to allow nearestData to be corrext
+                setTimeout(function () {
+                    route(nearestData[0].lat, nearestData[0].long)
+                }, 500);
+            }
+        },
+        error: function (json) {
+            console.log(json.responseText)
         }
-        e.preventDefault();
+    })
+})
+
+function getClosest(element, shortest, nearestData) {
+    geocoder.geocode({ 'address': element.postcode }, function (results) {
+        lat = results[0].geometry.location.lat();
+        lng = results[0].geometry.location.lng();
+        distance = calcPathLength(lat, lng);
+        //check if shortest and push to array
+        if (distance < shortest) {
+            shortest = distance;
+            nearestData.push({
+                'lat': lat,
+                'long': lng,
+                'distance': distance,
+                name: element.name,
+                street: element.street,
+                city: element.city,
+                postcode: element.postcode
+            });
+        }
+    });
+    return shortest;
+}
+
+function route(lat, long) {
+    //hard set routes for now
+    var start = new google.maps.LatLng(homeLocation)
+    var end = new google.maps.LatLng(lat, long)
+    //calculate distance
+    // console.log(google.maps.geometry.spherical.computeDistanceBetween (start, end))
+    var request = {
+        origin: start,
+        destination: end,
+        travelMode: 'DRIVING'
+    }
+    directionsService.route(request, function (result, status) {
+        if (status == 'OK') {
+            directionsDisplay.setDirections(result);
+        }
     })
 }
+
+// calculate distance
+function calcPathLength(lat, long) {
+    let distance = 0
+    let pos1 = new google.maps.LatLng(lat, long)
+    let pos2 = new google.maps.LatLng(homeLocation.lat, homeLocation.lng)
+    distance += google.maps.geometry.spherical.computeDistanceBetween(pos1, pos2)
+    return distance
+}
+
+// change location to address on search
+$("#searchBtn").click(function (e) {
+
+    let address = $("#address").val()
+
+    //get longlat and place marker
+    geocoder.geocode({ 'address': address }, function (results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+            //save long lat
+            homeLocation = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
+            //center map
+            map.setCenter(homeLocation)
+        }
+        else {
+            // Geocode not working:()
+            alert('Geocode was not successful for the following reason: ' + status);
+        }
+    })
+    console.log("NEW HOME: " + homeLocation.lat + ',' + homeLocation.lng)
+
+})
+
+//if enter pressed on input trigger click
+$('#address').keypress(function (e) {
+    //Enter key pressed
+    if (e.which == 13) {
+        e.preventDefault()
+        $('#searchBtn').click()
+    }
+})
 
 
 // Use AJAX for delete,update and create to save on API requests if vaildation fails
@@ -144,54 +239,6 @@ $(".delete").click(function () {
         })
     }
 })
-
-//fetch restaurant and place on map
-let fetchData = function () {
-
-    let infowindow = new google.maps.InfoWindow({
-        content: ''
-    })
-
-    $.ajax({
-        type: 'get',
-        method: 'get',
-        url: '/get',
-        success: function (json) {
-            restaurants = json.data
-            //foreach 
-            restaurants.forEach(function (el) {
-                geoLocate(el.postcode)
-            })
-        },
-        error: function (json) {
-            console.log(json.responseText)
-        }
-    })
-}
-
-function geoLocate(address) {
-    geocoder.geocode({ 'address': address }, function (results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-            //save long lat
-            lat = results[0].geometry.location.lat()
-            long = results[0].geometry.location.lng()
-            //set marker
-            let marker = new google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location
-            });
-            
-            //keeping track of markers
-            markers.push(marker)
-        }
-        else {
-            // Geocode not working:()
-            alert('Geocode was not successful for the following reason: ' + status)
-        }
-        
-    });
-}
-
 
 function successMessage(message) {
     $(".errors").text(message)

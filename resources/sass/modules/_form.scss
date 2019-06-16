@@ -13,14 +13,8 @@ form {
         border: none;
         outline: none;
     }
-
-    input[type="button"]{
-        outline:none;
-     }
-     input[type="button"]::-moz-focus-inner {
-        border: 0;
-     }
-
+    button:focus {outline:0;}
+    
     input {
         width: 250px;
         border: 0;

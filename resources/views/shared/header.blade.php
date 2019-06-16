@@ -6,18 +6,16 @@
         </div>
 
         <ul>
-
+            @if (Request::path() == '/')
             <li id="search">
-
-                <form action="">
+                <form action="" id="searchForm">
                     <input name="address" type="text" placeholder="Enter your Postcode/Address" id="address">
                     <button id="searchBtn" type="button">
                         <i class="fas fa-search"></i>Search
                     </button>
                 </form>
-
             </li>
-
+            @endif
             <a href="/">
                 <li>Home</li>
             </a>

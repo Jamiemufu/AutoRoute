@@ -109,12 +109,8 @@ form button {
   outline: none;
 }
 
-form input[type=button] {
-  outline: none;
-}
-
-form input[type=button]::-moz-focus-inner {
-  border: 0;
+form button:focus {
+  outline: 0;
 }
 
 form input {
