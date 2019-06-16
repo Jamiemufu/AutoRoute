@@ -15,7 +15,7 @@ use App\Http\Controllers\RestaurantsController;
 Route::get('/', function () {
     return view('pages.home');
 });
-
+Route::get('/get', 'RestaurantsController@home')->name('home');
 Route::get('/admin/restaurants/', 'RestaurantsController@index')->middleware('auth.basic')->name('dash');
 Route::get('/admin/restaurants/create', 'RestaurantsController@create')->middleware('auth.basic')->name('create');
 Route::post('/admin/restaurants/', 'RestaurantsController@store')->name('store');

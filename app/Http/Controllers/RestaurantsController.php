@@ -20,6 +20,15 @@ class RestaurantsController extends Controller
         return view('admin.dash')->with('rest', $rest);
     }
 
+    public function home()
+    {
+        $rest = \App\Restaurant::all(['id', 'name', 'street', 'city', 'postcode']);
+        
+        return response()->json([
+            'data' => $rest
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

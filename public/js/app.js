@@ -36901,22 +36901,22 @@ module.exports = function(module) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js"); //initialise map
+__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
+var geocoder;
+var map;
+var restaurant;
+var markers = []; //load when ready
 
 window.initMap = function () {
-  var lat;
+  geocoder = new google.maps.Geocoder(); //default map options
 
-  var _long;
-
-  var geocoder = new google.maps.Geocoder();
-  var map = new google.maps.Map(document.getElementById('map'), {
-    //default map center to Birmingham
+  var mapOptions = {
     center: new google.maps.LatLng(52.4882913, -1.9048588),
-    zoom: 15,
-    mapTypeControl: false,
-    zoomControl: false
-  }); // Try HTML5 geolocation.
+    zoom: 13,
+    mapTypeControl: false
+  };
+  map = new google.maps.Map(document.getElementById('map'), mapOptions); // Try HTML5 geolocation to get current location
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function (position) {
@@ -36928,33 +36928,19 @@ window.initMap = function () {
     });
   } else {
     // Browser doesn't support Geolocation
-    this.console.log('Browser does not support geolocation');
-  }
-  /* TODO: AJAX GET NEAREST RESTAURANT FROM DATABASE AND ROUTE */
-  // change location to address on search
+    console.log('Browser does not support geolocation');
+  } //Fetch restaurants and put marker on map (ajax)
 
+
+  fetchData(); // change location to address on search
 
   $("#searchBtn").click(function (e) {
-    event.preventDefault();
-    var address = $("#address").val();
-    geocoder.geocode({
-      'address': address
-    }, function (results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-        //save long lat
-        lat = results[0].geometry.location.lat();
-        _long = results[0].geometry.location.lng(); //set marker
+    var address = $("#address").val(); //get longlat and place marker
 
-        var marker = new google.maps.Marker({
-          map: map,
-          position: results[0].geometry.location
-        }); //center map
+    geoLocate(address); //center map
 
-        map.setCenter(results[0].geometry.location);
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });
+    map.setCenter(results[0].geometry.location);
+    e.preventDefault();
   }); //if enter pressed on input trigger click
 
   $('#address').keypress(function (e) {
@@ -36962,9 +36948,11 @@ window.initMap = function () {
     if (e.which == 13) {
       $('#searchBtn').click();
     }
+
+    e.preventDefault();
   });
 }; // Use AJAX for delete,update and create to save on API requests if vaildation fails
-//create via ajax to reduce API requests on failed validated
+//create record
 
 
 $("#create").click(function () {
@@ -36989,7 +36977,7 @@ $("#create").click(function () {
       setErrors(json);
     }
   });
-}); //create via ajax to reduce API requests on failed validated
+}); //update record
 
 $("#update").click(function () {
   var token = $("meta[name='csrf-token']").attr("content");
@@ -37014,7 +37002,7 @@ $("#update").click(function () {
       setErrors(json);
     }
   });
-}); // delete record
+}); //delete record
 
 $(".delete").click(function () {
   var message = 'Are you sure you want to delete this restaurant';
@@ -37037,7 +37025,50 @@ $(".delete").click(function () {
       }
     });
   }
-});
+}); //fetch restaurant and place on map
+
+var fetchData = function fetchData() {
+  var infowindow = new google.maps.InfoWindow({
+    content: ''
+  });
+  $.ajax({
+    type: 'get',
+    method: 'get',
+    url: '/get',
+    success: function success(json) {
+      restaurants = json.data; //foreach 
+
+      restaurants.forEach(function (el) {
+        geoLocate(el.postcode);
+      });
+    },
+    error: function error(json) {
+      console.log(json.responseText);
+    }
+  });
+};
+
+function geoLocate(address) {
+  geocoder.geocode({
+    'address': address
+  }, function (results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      //save long lat
+      lat = results[0].geometry.location.lat();
+      long = results[0].geometry.location.lng(); //set marker
+
+      var marker = new google.maps.Marker({
+        map: map,
+        position: results[0].geometry.location
+      }); //keeping track of markers
+
+      markers.push(marker);
+    } else {
+      // Geocode not working:()
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+  });
+}
 
 function successMessage(message) {
   $(".errors").text(message);
