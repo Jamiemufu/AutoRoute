@@ -36905,7 +36905,9 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 var geocoder;
 var map;
-var homeLocation; //load when ready
+var homeLocation; //set the shortest number globally
+
+var shortestNumber = Number.MAX_SAFE_INTEGER; //load when ready
 
 window.initMap = function () {
   geocoder = new google.maps.Geocoder();
@@ -36919,8 +36921,7 @@ window.initMap = function () {
     mapTypeId: 'roadmap'
   };
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
-  directionsDisplay.setMap(map); // route();
-  // Try HTML5 geolocation to get current location
+  directionsDisplay.setMap(map); // Try HTML5 geolocation to get current location
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function (position) {
@@ -36934,9 +36935,7 @@ window.initMap = function () {
   } else {
     // Browser doesn't support Geolocation
     console.log('Browser does not support geolocation');
-  } //Fetch restaurants and put marker on map (ajax)
-  //Fetch and return nearest
-
+  }
 };
 
 $(document).ready(function () {
@@ -36945,20 +36944,19 @@ $(document).ready(function () {
     method: 'get',
     url: '/get',
     success: function success(json) {
-      data = json.data; //check if data is no emtpy
+      data = json.data;
+      var nearestData = []; //check if data is not emtpy
 
       if (data.length !== 0) {
-        var nearestData = []; //set max number for comparison
-
-        var shortest = Number.MAX_VALUE; //geocode and get long lats and distance
-
+        //geocode and get long lats and distance
         data.forEach(function (element) {
-          shortest = getClosest(element, shortest, nearestData);
+          getShortest(element, nearestData);
         }); //set time out to allow nearestData to be corrext
 
         setTimeout(function () {
-          route(nearestData[0].lat, nearestData[0]["long"]);
-        }, 500);
+          //nearest data always pushes shortest distance to end of array, so use last index to get shortest
+          route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1]["long"]);
+        }, 1000);
       }
     },
     error: function error(json) {
@@ -36967,16 +36965,18 @@ $(document).ready(function () {
   });
 });
 
-function getClosest(element, shortest, nearestData) {
+function getShortest(element, nearestData) {
+  //geocode the postcode of the element passed in to get long/lat to calc distance
   geocoder.geocode({
     'address': element.postcode
   }, function (results) {
     lat = results[0].geometry.location.lat();
     lng = results[0].geometry.location.lng();
     distance = calcPathLength(lat, lng); //check if shortest and push to array
+    //now working after moving comparison number globally
 
-    if (distance < shortest) {
-      shortest = distance;
+    if (distance < shortestNumber) {
+      shortestNumber = distance;
       nearestData.push({
         'lat': lat,
         'long': lng,
@@ -36988,15 +36988,12 @@ function getClosest(element, shortest, nearestData) {
       });
     }
   });
-  return shortest;
 }
 
 function route(lat, _long) {
-  //hard set routes for now
+  //set start to homelocation (from page loading or clicking search)
   var start = new google.maps.LatLng(homeLocation);
-  var end = new google.maps.LatLng(lat, _long); //calculate distance
-  // console.log(google.maps.geometry.spherical.computeDistanceBetween (start, end))
-
+  var end = new google.maps.LatLng(lat, _long);
   var request = {
     origin: start,
     destination: end,
@@ -37004,6 +37001,8 @@ function route(lat, _long) {
   };
   directionsService.route(request, function (result, status) {
     if (status == 'OK') {
+      console.log(result.routes[0].legs[0].distance);
+      console.log(result.routes[0].legs[0].duration);
       directionsDisplay.setDirections(result);
     }
   });
@@ -37015,7 +37014,7 @@ function calcPathLength(lat, _long2) {
   var pos1 = new google.maps.LatLng(lat, _long2);
   var pos2 = new google.maps.LatLng(homeLocation.lat, homeLocation.lng);
   distance += google.maps.geometry.spherical.computeDistanceBetween(pos1, pos2);
-  return distance;
+  return Math.round(distance * 10) / 10;
 } // change location to address on search
 
 

@@ -1,8 +1,10 @@
 require('./bootstrap')
 
-var geocoder
-var map
-var homeLocation
+let geocoder
+let map
+let homeLocation
+//set the shortest number globally
+let shortestNumber = Number.MAX_SAFE_INTEGER
 
 //load when ready
 window.initMap = function () {
@@ -22,7 +24,6 @@ window.initMap = function () {
     map = new google.maps.Map(document.getElementById('map'), mapOptions)
     directionsDisplay.setMap(map)
 
-    // route();
     // Try HTML5 geolocation to get current location
     if (navigator.geolocation) {
 
@@ -38,9 +39,6 @@ window.initMap = function () {
         // Browser doesn't support Geolocation
         console.log('Browser does not support geolocation')
     }
-
-    //Fetch restaurants and put marker on map (ajax)
-    //Fetch and return nearest
 }
 
 $(document).ready(function () {
@@ -50,22 +48,19 @@ $(document).ready(function () {
         url: '/get',
         success: function (json) {
             data = json.data
-
-            //check if data is no emtpy
+            let nearestData = []
+            
+            //check if data is not emtpy
             if (data.length !== 0) {
-                var nearestData = []
-                //set max number for comparison
-                var shortest = Number.MAX_VALUE
-
                 //geocode and get long lats and distance
                 data.forEach(element => {
-                    shortest = getClosest(element, shortest, nearestData);
+                    getShortest(element, nearestData);
                 })
-
                 //set time out to allow nearestData to be corrext
                 setTimeout(function () {
-                    route(nearestData[0].lat, nearestData[0].long)
-                }, 500);
+                    //nearest data always pushes shortest distance to end of array, so use last index to get shortest
+                    route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1].long)
+                }, 1000)
             }
         },
         error: function (json) {
@@ -74,14 +69,16 @@ $(document).ready(function () {
     })
 })
 
-function getClosest(element, shortest, nearestData) {
+function getShortest(element, nearestData) {
+    //geocode the postcode of the element passed in to get long/lat to calc distance
     geocoder.geocode({ 'address': element.postcode }, function (results) {
-        lat = results[0].geometry.location.lat();
-        lng = results[0].geometry.location.lng();
-        distance = calcPathLength(lat, lng);
+        lat = results[0].geometry.location.lat()
+        lng = results[0].geometry.location.lng()
+        distance = calcPathLength(lat, lng)
         //check if shortest and push to array
-        if (distance < shortest) {
-            shortest = distance;
+        //now working after moving comparison number globally
+        if (distance < shortestNumber) {
+            shortestNumber = distance
             nearestData.push({
                 'lat': lat,
                 'long': lng,
@@ -90,26 +87,27 @@ function getClosest(element, shortest, nearestData) {
                 street: element.street,
                 city: element.city,
                 postcode: element.postcode
-            });
+            })
         }
-    });
-    return shortest;
+    })
 }
 
 function route(lat, long) {
-    //hard set routes for now
-    var start = new google.maps.LatLng(homeLocation)
-    var end = new google.maps.LatLng(lat, long)
-    //calculate distance
-    // console.log(google.maps.geometry.spherical.computeDistanceBetween (start, end))
-    var request = {
+   //set start to homelocation (from page loading or clicking search)
+    let start = new google.maps.LatLng(homeLocation)
+    let end = new google.maps.LatLng(lat, long)
+    
+    let request = {
         origin: start,
         destination: end,
         travelMode: 'DRIVING'
     }
+    
     directionsService.route(request, function (result, status) {
         if (status == 'OK') {
-            directionsDisplay.setDirections(result);
+            console.log(result.routes[0].legs[0].distance)
+            console.log(result.routes[0].legs[0].duration)
+            directionsDisplay.setDirections(result)
         }
     })
 }
@@ -120,7 +118,7 @@ function calcPathLength(lat, long) {
     let pos1 = new google.maps.LatLng(lat, long)
     let pos2 = new google.maps.LatLng(homeLocation.lat, homeLocation.lng)
     distance += google.maps.geometry.spherical.computeDistanceBetween(pos1, pos2)
-    return distance
+    return Math.round(distance * 10) / 10;
 }
 
 // change location to address on search
