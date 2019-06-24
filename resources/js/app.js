@@ -3,6 +3,7 @@ require('./bootstrap')
 let geocoder
 let map
 let homeLocation
+let nearestData = []
 //set the shortest number globally
 let shortestNumber = Number.MAX_SAFE_INTEGER
 
@@ -41,33 +42,34 @@ window.initMap = function () {
     }
 }
 
-$(document).ready(function () {
-    $.ajax({
-        type: 'get',
-        method: 'get',
-        url: '/get',
-        success: function (json) {
-            data = json.data
-            let nearestData = []
-            
-            //check if data is not emtpy
-            if (data.length !== 0) {
-                //geocode and get long lats and distance
-                data.forEach(element => {
-                    getShortest(element, nearestData);
-                })
-                //set time out to allow nearestData to be corrext
-                setTimeout(function () {
-                    //nearest data always pushes shortest distance to end of array, so use last index to get shortest
-                    route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1].long)
-                }, 1000)
+getRoutes();
+
+function getRoutes() {
+        $.ajax({
+            type: 'get',
+            method: 'get',
+            url: '/get',
+            success: function (json) {
+                data = json.data;                
+                //check if data is not emtpy
+                if (data.length !== 0) {
+                    //geocode and get long lats and distance
+                    data.forEach(element => {
+                        getShortest(element, nearestData);
+                    });
+                    //set time out to allow nearestData to be corrext
+                    setTimeout(function () {
+                        //nearest data always pushes shortest distance to end of array, so use last index to get shortest
+                        route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1].long);
+                    }, 1000);
+                }
+            },
+            error: function (json) {
+                console.log(json.responseText);
             }
-        },
-        error: function (json) {
-            console.log(json.responseText)
-        }
-    })
-})
+        });
+    
+}
 
 function getShortest(element, nearestData) {
     //geocode the postcode of the element passed in to get long/lat to calc distance
@@ -132,14 +134,17 @@ $("#searchBtn").click(function (e) {
             //save long lat
             homeLocation = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
             //center map
-            map.setCenter(homeLocation)
+            setTimeout(function () {
+                //nearest data always pushes shortest distance to end of array, so use last index to get shortest
+                route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1].long);
+            }, 1000);
         }
         else {
             // Geocode not working:()
             alert('Geocode was not successful for the following reason: ' + status);
         }
-    })
-    console.log("NEW HOME: " + homeLocation.lat + ',' + homeLocation.lng)
+    })    
+    
 
 })
 

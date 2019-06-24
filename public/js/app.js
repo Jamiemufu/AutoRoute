@@ -36905,7 +36905,8 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 var geocoder;
 var map;
-var homeLocation; //set the shortest number globally
+var homeLocation;
+var nearestData = []; //set the shortest number globally
 
 var shortestNumber = Number.MAX_SAFE_INTEGER; //load when ready
 
@@ -36938,14 +36939,15 @@ window.initMap = function () {
   }
 };
 
-$(document).ready(function () {
+getRoutes();
+
+function getRoutes() {
   $.ajax({
     type: 'get',
     method: 'get',
     url: '/get',
     success: function success(json) {
-      data = json.data;
-      var nearestData = []; //check if data is not emtpy
+      data = json.data; //check if data is not emtpy
 
       if (data.length !== 0) {
         //geocode and get long lats and distance
@@ -36963,7 +36965,7 @@ $(document).ready(function () {
       console.log(json.responseText);
     }
   });
-});
+}
 
 function getShortest(element, nearestData) {
   //geocode the postcode of the element passed in to get long/lat to calc distance
@@ -37031,13 +37033,15 @@ $("#searchBtn").click(function (e) {
         lng: results[0].geometry.location.lng() //center map
 
       };
-      map.setCenter(homeLocation);
+      setTimeout(function () {
+        //nearest data always pushes shortest distance to end of array, so use last index to get shortest
+        route(nearestData[nearestData.length - 1].lat, nearestData[nearestData.length - 1]["long"]);
+      }, 1000);
     } else {
       // Geocode not working:()
       alert('Geocode was not successful for the following reason: ' + status);
     }
   });
-  console.log("NEW HOME: " + homeLocation.lat + ',' + homeLocation.lng);
 }); //if enter pressed on input trigger click
 
 $('#address').keypress(function (e) {
@@ -37221,8 +37225,8 @@ if (token) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\Web_Dev\CreativeInsight\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! D:\Web_Dev\CreativeInsight\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /Users/jamieevans/Documents/creativeInsight/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/jamieevans/Documents/creativeInsight/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
