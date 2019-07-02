@@ -24,9 +24,7 @@ class RestaurantsController extends Controller
     {
         $rest = \App\Restaurant::all(['id', 'name', 'street', 'city', 'postcode']);
         
-        return response()->json([
-            'data' => $rest
-        ]);
+        return response()->json(['data' => $rest]);
     }
 
     /**

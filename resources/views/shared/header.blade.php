@@ -2,7 +2,7 @@
     <nav>
 
         <div>
-            <h5>Creative Insight Search</h5>
+            <h5>Auto Router</h5>
         </div>
 
         <ul>
